@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Clipping – TikTok login</title>
+<style>
+  :root { --bg:#fff; --text:#1a1a1a; --muted:#666; --box:#f4f4f6; --ok:#16a34a; --bad:#dc2626; --acc:#7c3aed; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1115; --text:#e8eaf0; --muted:#8b93a7; --box:#1b1e26; } }
+  body { font: 16px/1.6 system-ui, -apple-system, Segoe UI, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 16px; color: var(--text); background: var(--bg); }
+  h1 { font-size: 24px; }
+  pre { background: var(--box); padding: 14px; border-radius: 8px; white-space: pre-wrap; word-break: break-all; font-size: 14px; }
+  button { background: var(--acc); color: #fff; border: 0; border-radius: 8px; padding: 10px 18px; font-weight: 600; cursor: pointer; font-size: 15px; }
+  .muted { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<h1 id="title">TikTok login</h1>
+<div id="out"><p class="muted">Reading the response from TikTok…</p></div>
+<script>
+  // Nothing is sent anywhere: this page only displays the code TikTok put in the URL,
+  // so you can paste it into the Clipping app on your own computer.
+  const q = new URLSearchParams(location.search);
+  const out = document.getElementById('out');
+  const title = document.getElementById('title');
+  const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  if (q.get('code')) {
+    const cmd = `.\\clipper.bat auth-tiktok --code "${q.get('code')}" --state "${q.get('state') || ''}"`;
+    title.textContent = 'Almost done ✅';
+    title.style.color = 'var(--ok)';
+    out.innerHTML = `<p>Copy this command and run it in the terminal of the Clipping project
+      (within a few minutes — the code expires):</p><pre id="cmd">${esc(cmd)}</pre>
+      <button id="copy">Copy command</button> <span id="copied" class="muted"></span>`;
+    document.getElementById('copy').onclick = async () => {
+      try { await navigator.clipboard.writeText(cmd); document.getElementById('copied').textContent = 'Copied!'; }
+      catch { document.getElementById('copied').textContent = 'Select the text above and copy it.'; }
+    };
+  } else if (q.get('error')) {
+    title.textContent = 'TikTok login failed';
+    title.style.color = 'var(--bad)';
+    out.innerHTML = `<pre>${esc(q.get('error'))}\n${esc(q.get('error_description') || '')}</pre>`;
+  } else {
+    out.innerHTML = '<p class="muted">This page is used by the Clipping app to finish the TikTok login. Nothing to do here.</p>';
+  }
+</script>
+</body>
+</html>
